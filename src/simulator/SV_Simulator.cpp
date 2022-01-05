@@ -6,6 +6,7 @@
  */
 
 #include "SV_Simulator.h"
+#include "param_defines.h"
 
 bool is_valid(char base) {
 	return (((base == 'A' || base == 'C') || (base == 'R' || base == 'X')) || ((base == 'T' || base == 'G') || (base == 'N' || base == 'M')));
@@ -55,6 +56,50 @@ void simulate(std::map<std::string, std::string> genome, std::vector<struct_var>
 }
 
 parameter parse_param(std::string filename) {
+	std::ifstream param_stream(filename, std::ifstream::binary);
+	Json::Value root;   // starts as "null"; will contain the root value after parsing
+
+	if (!param_stream.good()) {
+		std::cout << "Annotation Parser: could not open file: " << filename.c_str() << std::endl;
+		exit(0);
+	}
+
+	param_stream >> root;
+	parameter tmp;
+
+	tmp.dup_min = root[DUPLICATION_minimum_length].asInt();
+	tmp.dup_max = root[DUPLICATION_maximum_length].asInt();
+	tmp.dup_max_amp = root[DUPLICATION_maximum_num].asInt();
+	tmp.dup_num = root[DUPLICATION_number].asInt();
+	tmp.indel_min = root[INDEL_minimum_length].asInt();
+	tmp.indel_max = root[INDEL_maximum_length].asInt();
+	tmp.indel_num = root[INDEL_number].asInt();
+	tmp.translocations_min = root[TRANSLOCATION_minimum_length].asInt();
+	tmp.translocations_max = root[TRANSLOCATION_maximum_length].asInt();
+	tmp.translocations_num = root[TRANSLOCATION_number].asInt();
+	tmp.inv_min = root[INVERSION_minimum_length].asInt();
+	tmp.inv_max = root[INVERSION_maximum_length].asInt();
+	tmp.inv_num = root[INVERSION_number].asInt();
+	tmp.inv_del_num = 0;
+
+	tmp.inv_del_min = root[INV_del_minimum_length].asInt();
+	tmp.inv_del_max = root[INV_del_maximum_length].asInt();
+	tmp.inv_del_num = root[INV_del_number].asInt();
+	tmp.inv_dup_num = 0;
+
+	tmp.inv_dup_min = root[INV_dup_minimum_length].asInt();
+	tmp.inv_dup_max = root[INV_dup_maximum_length].asInt();
+	tmp.inv_dup_num = root[INV_dup_number].asInt();
+	tmp.diploid=false;
+
+	tmp.diploid = (root[Number_haploid].asInt() == 2);
+	tmp.hom_rate = root[homozygous_ratio].asFloat();
+
+	param_stream.close();
+	return tmp;
+}
+
+parameter parse_param_legacy(std::string filename) {
 	parameter tmp;
 	size_t buffer_size = 200000;
 	char*buffer = new char[buffer_size];
@@ -305,9 +350,9 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
 	for (int i = 0; i < par.indel_num; i++) {
 		//std::cout << "indel" << std::endl;
 		if (rand() % 100 <= 50) {
-			mut.type = 1; //insertion
+			mut.type = 1; //deletion
 		} else {
-			mut.type = 4; //deletion
+			mut.type = 4; //insertion
 		}
 		mut.pos = choose_pos(genome, par.indel_min, par.indel_max, svs);
 		mut.target = mut.pos;
@@ -426,9 +471,9 @@ std::vector<struct_var> generate_mutations_ref(std::string parameter_file, std::
 	for (int i = 0; i < par.indel_num; i++) {
 		//std::cout << "indel" << std::endl;
 		if (rand() % 100 <= 50) {
-			mut.type = 1; //insertion
+			mut.type = 1; //deletion
 		} else {
-			mut.type = 4; //deletion
+			mut.type = 4; //insertion
 		}
 		mut.pos = choose_pos(genome, par.indel_min, par.indel_max, svs);
 		mut.target = mut.pos;
@@ -1209,6 +1254,43 @@ void simulate_SV(std::string ref_file, std::string parameter_file, float snp_fre
 }
 
 void generate_parameter_file(std::string parameter_file) {
+   std::string json_example = "{ \n \
+		\"DUPLICATION_minimum_length\": 100,\n \
+		\"DUPLICATION_maximum_length\": 10000,\n \
+		\"DUPLICATION_maximum_num\": 5,\n \
+		\"DUPLICATION_number\": 3,\n \
+		\"INDEL_minimum_length\": 20,\n \
+		\"INDEL_maximum_length\": 500,\n \
+		\"INDEL_number\": 1,\n \
+		\"TRANSLOCATION_minimum_length\": 1000,\n \
+		\"TRANSLOCATION_maximum_length\": 3000,\n \
+		\"TRANSLOCATION_number\": 2,\n \
+		\"INVERSION_minimum_length\": 600,\n \
+		\"INVERSION_maximum_length\": 800,\n \
+		\"INVERSION_number\": 4,\n \
+		\"INV_del_minimum_length\": 600,\n \
+		\"INV_del_maximum_length\": 800,\n \
+		\"INV_del_number\": 2,\n \
+		\"INV_dup_minimum_length\": 600,\n \
+		\"INV_dup_maximum_length\": 800,\n \
+		\"INV_dup_number\": 2,\n \
+		\"Number_haploid\": 1,\n \
+		\"homozygous_ratio\": 0.6\n \
+	}";
+	FILE *file2;
+	auto parameter_file_json = parameter_file + ".json";
+	file2 = fopen(parameter_file_json.c_str(), "w");
+	if (file2 == NULL) {
+		std::cerr << "Error in printing: The file or path that you set " << parameter_file.c_str() << " is not valid. It can be that there is no disc space available." << std::endl;
+		exit(0);
+	}
+	fprintf(file2, "%s", json_example.c_str());
+	fclose(file2);
+}
+
+
+
+void generate_parameter_file_legacy(std::string parameter_file) {
 	FILE *file2;
 	file2 = fopen(parameter_file.c_str(), "w");
 	if (file2 == NULL) {

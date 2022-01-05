@@ -21,7 +21,9 @@ class Parameter {
 private:
 	Parameter() {
 		min_freq=-1;
-		version ="1.0.7";
+		char ver[255] = {0};
+		sprintf(ver, "1.0.8 (j-levy indel patch) built %s %s", __DATE__, __TIME__);
+		version = ver;
 	}
 	~Parameter() {
 

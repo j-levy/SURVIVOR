@@ -15,6 +15,25 @@ Nature communications, Vol. 8, 14061, 24.01.2017, p. 1-11. DOI:10.1038/NCOMMS140
 
 ## INSTALL:
 
+You will need `libjsoncpp` to compile and run SURVIVOR as it uses JSON file format for parameters parsing.
+
+Debian
+```
+sudo apt install libjsoncpp24 libjsoncpp-dev
+```
+
+Ubuntu
+```
+sudo apt install libjsoncpp24 libjsoncpp-dev
+```
+
+Anaconda (any Linux distribution - you may need to adjust some include paths though.)
+```
+conda install -c conda-forge libjsoncpp
+```
+
+TODO: add libjsoncpp as dependency in future conda package (where's the recipe, though???)
+
 Download SURVIVOR:
 <pre>
 git clone https://github.com/fritzsedlazeck/SURVIVOR.git

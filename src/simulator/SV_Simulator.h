@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <jsoncpp/json/json.h>
+
 struct parameter {
 	int dup_min;
 	int dup_max;
