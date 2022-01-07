@@ -64,3 +64,6 @@ clean:
 .PHONY: all clean dependents
 
 -include ../makefile.targets
+
+install: SURVIVOR
+	cp SURVIVOR ${CONDA_PREFIX}/bin

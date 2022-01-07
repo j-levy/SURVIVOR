@@ -22,7 +22,7 @@ private:
 	Parameter() {
 		min_freq=-1;
 		char ver[255] = {0};
-		sprintf(ver, "1.0.8 (j-levy indel patch) built %s %s", __DATE__, __TIME__);
+		sprintf(ver, "1.0.8 (j-levy json parser) built %s %s", __DATE__, __TIME__);
 		version = ver;
 	}
 	~Parameter() {
